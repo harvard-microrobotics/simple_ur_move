@@ -28,7 +28,7 @@ import os
 import rospkg
 from simple_ur_move.cartesian_trajectory_handler import CartesianTrajectoryHandler
 ```
-2. Create a trajectory handler and load trajectory
+2. Create a trajectory handler
 ```python
 traj_handler = CartesianTrajectoryHandler(
     name="",
