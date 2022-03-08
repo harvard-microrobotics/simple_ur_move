@@ -25,7 +25,7 @@ import numpy as np
 
 filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
 
-class TrajectoryHandler():
+class CartesianTrajectoryHandler():
     """
     A ROS Action server to run single tests.
 
@@ -348,4 +348,11 @@ class TrajectoryHandler():
         """
         Shut down gracefully
         """
-        self.trajectory_client.cancel_all_goals()  
+        self.trajectory_client.cancel_all_goals()
+
+
+    def __del__(self):
+        """
+        Shut down gracefully upon object deletion
+        """
+        self.shutdown()
