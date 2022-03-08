@@ -1,12 +1,13 @@
 import rospy
+import yaml
 
-def call_service(name, service_type, **fargs):
+def call_service(service_name, service_type, **fargs):
     '''
     Call a service and handle the result
 
     Parameters
     ----------
-    name : str
+    service_name : str
         Name of the service to call
     service_type : ROS srv
         ROS service class (must be correct for the service name you are calling)
@@ -19,9 +20,9 @@ def call_service(name, service_type, **fargs):
         The response from the service. Returns ``None`` if the service
         call was unsuccessful.
     '''
-    rospy.wait_for_service(name)
+    rospy.wait_for_service(service_name)
     try:
-        fun = rospy.ServiceProxy(name, service_type)
+        fun = rospy.ServiceProxy(service_name, service_type)
         resp1 = fun(**fargs)
         return resp1
     except rospy.ServiceException as e:
@@ -48,7 +49,7 @@ def load_yaml(filename):
         with open(filename, 'r') as f:
             out = yaml.safe_load(f)
     except:
-        pass    
+        pass  
     return out
 
 

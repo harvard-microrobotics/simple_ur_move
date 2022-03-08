@@ -3,7 +3,7 @@
 	<!-- Get arguements  -->
 	<arg name="traj" default="False" doc="The trajectory you want to run." />
 	<arg name="robot_name" default="" doc="Name of the robot. Leave blank if not specifying" />
-    <arg name="controller" default="forward_cartesian_traj_controller" doc="Decide between 'forward_cartesian_traj_controller', 'pose_based_cartesian_traj_controller', and 'joint_based_cartesian_traj_controller'" />
+    <arg name="controller" default="pose_based_cartesian_traj_controller" doc="Decide between 'forward_cartesian_traj_controller', 'pose_based_cartesian_traj_controller', and 'joint_based_cartesian_traj_controller'" />
     <arg name="debug" default="False" doc="Whether debug is on" />
 
 
@@ -11,6 +11,7 @@
     <node name="ur_trajectory_node" pkg="simple_ur_move" type="run_cartesian_trajectory.py" respawn="false"
     	output="screen">
         <param name="traj" type="str" value="$(arg traj)" />
+        <param name="controller" type="str" value="$(arg controller)" />
 		<param name="robot_name" type="str" value="$(arg robot_name)" />
         <param name="debug" type="bool" value="$(arg debug)"/>
     </node>

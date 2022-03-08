@@ -15,10 +15,11 @@ class ControllerHandler():
     robot_name : str
         Name of the robot
     '''
-    def __init__(self, robot_name):
+    def __init__(self, robot_name, debug=False):
         self.robot_name = robot_name
         self.reserved_controllers = reserved_controllers
         self.controller_list = self.get_controller_list()
+        self.debug = debug
 
     
     def get_controller_list(self):
@@ -32,7 +33,7 @@ class ControllerHandler():
         '''
         name = self.robot_name+'/controller_manager/list_controllers'
         result = utils.call_service(name, ListControllers)
-        return result
+        return result.controller
 
     
     def set_reserved_controllers(self, controllers):
@@ -62,7 +63,7 @@ class ControllerHandler():
             Service response from the controller manager
         '''
         name = self.robot_name+'/controller_manager/load_controller'
-        result = utils.call_service(name, LoadController, controller)
+        result = utils.call_service(name, LoadController, name=str(controller))
         return result
 
 
@@ -81,7 +82,7 @@ class ControllerHandler():
             Service response from the controller manager
         '''
         name = self.robot_name+'/controller_manager/unload_controller'
-        result = utils.call_service(name, UnloadController, controller)
+        result = utils.call_service(name, UnloadController, name=str(controller))
         return result
 
     
@@ -109,11 +110,11 @@ class ControllerHandler():
         '''
         name = self.robot_name+'/controller_manager/switch_controller'
         result = utils.call_service(name, SwitchController,
-                                    start_controllers,
-                                    stop_controllers,
-                                    strictness,
-                                    start_asap,
-                                    timeout)
+                                    start_controllers = start_controllers,
+                                    stop_controllers = stop_controllers,
+                                    strictness = strictness,
+                                    start_asap = start_asap,
+                                    timeout = float(timeout))
         return result
 
 
@@ -136,7 +137,10 @@ class ControllerHandler():
 
         for ctrl in self.controller_list:
             if (controller != ctrl.name) and (ctrl.name not in self.reserved_controllers):
-                controllers_to_unload.append(ctrl.name)
+                controllers_to_unload.append(str(ctrl.name))
+
+        if self.debug:
+            print(controllers_to_unload)
                 
         self.load_controller(controller)
         self.switch_controller([controller],controllers_to_unload)
