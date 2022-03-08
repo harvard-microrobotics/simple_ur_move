@@ -25,6 +25,8 @@ A minimal example of how to move a UR robot with the new [Universal Robot ROS Dr
 ```python
 import os
 import rospkg
+from simple_ur_move.cartesian_trajectory_handler import CartesianTrajectoryHandler
+
 filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
 traj_file="pick_place.yaml"
 
