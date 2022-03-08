@@ -22,25 +22,61 @@ A minimal example of how to move a UR robot with the new [Universal Robot ROS Dr
 2. `roslaunch simple_ur_move run_cartesian_trajectory.launch traj:=pick_place.yaml`
 
 ### Use the cartesian trajectory handler
+1. Import nessecary packages
 ```python
 import os
 import rospkg
 from simple_ur_move.cartesian_trajectory_handler import CartesianTrajectoryHandler
-
+```
+2. Load trajectory from a file
+```python
+# Create a trajectory handler and load trajectory
+traj_handler = CartesianTrajectoryHandler(
+    name="",
+    controller="pose_based_cartesian_traj_controller",
+    debug=False)
+```
+3a. Load the trajectory config from a file
+```python
 filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
 traj_file="pick_place.yaml"
+traj_handler.load_config(filename=traj_file, directory=filepath_config)
+```
+3b. **_OR_** Set trajectory config directly
+```python
+config={TRAJECTORY CONFIG DICT}
+traj_handler.set_config(config)
+```
+4. Run the trajectory
+```python
+traj_handler.set_initialize_time(3.0)
+traj_handler.run_trajectory(blocking=True)
+traj_handler.shutdown()
+```
+
+**All together:**
+```python
+import os
+import rospkg
+from simple_ur_move.cartesian_trajectory_handler import CartesianTrajectoryHandler
 
 # Create a trajectory handler and load trajectory
 traj_handler = CartesianTrajectoryHandler(
     name="",
     controller="pose_based_cartesian_traj_controller",
     debug=False)
+
+# Load trajectory config from a file
+filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
+traj_file="pick_place.yaml"
 traj_handler.load_config(filename=traj_file, directory=filepath_config)
+
+# OR Set trajectory config directly
+#config={TRAJECTORY CONFIG DICT}
+#traj_handler.set_config(config)
+
+# Run the trajectory
 traj_handler.set_initialize_time(3.0)
-
-# Run trajectory
 traj_handler.run_trajectory(blocking=True)
-
-# Shutdown
 traj_handler.shutdown()
 ```
