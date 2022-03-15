@@ -28,9 +28,8 @@ import os
 import rospkg
 from simple_ur_move.cartesian_trajectory_handler import CartesianTrajectoryHandler
 ```
-2. Load trajectory from a file
+2. Create a trajectory handler
 ```python
-# Create a trajectory handler and load trajectory
 traj_handler = CartesianTrajectoryHandler(
     name="",
     controller="pose_based_cartesian_traj_controller",
@@ -60,7 +59,7 @@ import os
 import rospkg
 from simple_ur_move.cartesian_trajectory_handler import CartesianTrajectoryHandler
 
-# Create a trajectory handler and load trajectory
+# Create a trajectory handler
 traj_handler = CartesianTrajectoryHandler(
     name="",
     controller="pose_based_cartesian_traj_controller",
