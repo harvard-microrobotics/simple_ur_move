@@ -151,9 +151,11 @@ class CartesianTrajectoryHandler():
         traj_to_use = copy.deepcopy(trajectory)
         # Convert mm to m
         traj_to_use = self.convert_units(traj_to_use, direction='to_ros')
-
+    
         traj_packed = []
         for waypoint in traj_to_use:
+            if self.debug:
+                print('quaternion: ',waypoint['orientation'])
             pt = CartesianTrajectoryPoint()
             pose = Pose()
             pose.position= Point(x=waypoint['position'][0],
@@ -298,30 +300,10 @@ class CartesianTrajectoryHandler():
         point : dict
             Trajectory point to go to
         """
-        tf = rospy.wait_for_message(self.robot_name+'/tf', TFMessage)
-        joint_states = rospy.wait_for_message(self.robot_name+'/joint_states', JointState)
-        curr_pos = tf.transforms[0].transform
-        curr_pos_point = {}
-        curr_pos_point['time'] = 0.000
-        curr_pos_point['position'] = [curr_pos.translation.x,
-                                      curr_pos.translation.y,
-                                      curr_pos.translation.z]
-
-        curr_pos_point['orientation'] = [curr_pos.rotation.x,
-                                      curr_pos.rotation.y,
-                                      curr_pos.rotation.z,
-                                      curr_pos.rotation.w]
-
-        curr_pos_point['posture'] = {'posture_joint_names': joint_states.name,
-                                     'posture_joint_values': joint_states.position}
-
-        init_traj = self.convert_units([curr_pos_point],direction='from_ros')
-
         start_pt = copy.deepcopy(point)
         start_pt['time'] = self.initialize_time
-        init_traj.append(start_pt)
-
-        self._run_trajectory(trajectory=init_traj, blocking=True) 
+        
+        self._run_trajectory(trajectory=[start_pt], blocking=True) 
 
 
     def run_trajectory(self, blocking=True):

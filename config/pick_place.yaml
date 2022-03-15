@@ -47,19 +47,27 @@ trajectory:
   - time: 6.0
     position: [-0.100, -0.600, 0.300]
     orientation: [180,0,180]
+  
+  - time: 6.5
+    position: [-0.100, -0.600, 0.300]
+    orientation: [180,0,90]
 
   - time: 7.0
     position: [-0.300, -0.500, 0.300]
-    orientation: [180,0,180]
+    orientation: [180,0,90]
   
   - time: 8.0
     position: [-0.300, -0.500, 0.200]
-    orientation: [180,0,180]
+    orientation: [180,0,90]
 
   - time: 11.0
     position: [-0.300, -0.500, 0.200]
-    orientation: [180,0,180]
+    orientation: [180,0,90]
+    
+  - time: 11.5
+    position: [-0.300, -0.500, 0.200]
+    orientation: [180,0,90]
 
   - time: 12.0
     position: [-0.300, -0.500, 0.300]
-    orientation: [180,0,180]
+    orientation: [180,0,90]
