@@ -300,9 +300,13 @@ class CartesianTrajectoryHandler():
         point : dict
             Trajectory point to go to
         """
+        #joint_states = rospy.wait_for_message(self.robot_name+'/joint_states', JointState)
+
         start_pt = copy.deepcopy(point)
         start_pt['time'] = self.initialize_time
-        
+        #start_pt['posture'] = {'posture_joint_names': joint_states.name,
+        #                             'posture_joint_values': joint_states.position}
+
         self._run_trajectory(trajectory=[start_pt], blocking=True) 
 
 
