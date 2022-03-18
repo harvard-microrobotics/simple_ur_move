@@ -113,7 +113,7 @@ class CartesianTrajectoryHandler():
         self.settings = config.get('settings', None)
         self.trajectory = config.get('trajectory', None)
 
-        if self.settings is None or self.trajectory is None:
+        if self.settings is None:
             return
 
         self.units = self.settings.get('units',None)
