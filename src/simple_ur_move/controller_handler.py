@@ -18,7 +18,7 @@ class ControllerHandler():
     def __init__(self, robot_name, debug=False):
         self.robot_name = robot_name
         self.reserved_controllers = reserved_controllers
-        self.controller_list = self.get_controller_list()
+        self.update_controller_list()
         self.debug = debug
 
     
@@ -34,6 +34,43 @@ class ControllerHandler():
         name = self.robot_name+'/controller_manager/list_controllers'
         result = utils.call_service(name, ListControllers)
         return result.controller
+
+
+    def update_controller_list(self):
+        '''
+        Update the controller list via a ROS service call.
+        '''
+        self.controller_list = self.get_controller_list()
+
+
+    def get_controllers_with_state(self, states=None):
+        '''
+        Get a list of controllers that have a particular state
+
+        Parameters
+        ----------
+        states : list or str
+            List of states (or s single state) to check for
+            (``initialized``, ``running``, ``stopped``,
+            ``waiting``, ``aborted``, ``unknown``)
+
+        Returns
+        -------
+        controllers : list
+            List of controller names matching the states
+        '''
+        if states is None:
+            states = ['all']
+        elif isinstance(states, str):
+            states=[states]
+
+        self.update_controller_list()
+        controllers=[]
+        for ctrl in self.controller_list:
+            if ('all' in states) or(ctrl.state in states):
+                controllers.append(ctrl.name)
+        
+        return controllers
 
     
     def set_reserved_controllers(self, controllers):
@@ -132,7 +169,7 @@ class ControllerHandler():
         response : str
             Service response from the controller manager
         '''
-
+        self.update_controller_list()
         controllers_to_unload = []
 
         for ctrl in self.controller_list:
