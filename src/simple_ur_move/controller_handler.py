@@ -51,7 +51,7 @@ class ControllerHandler():
         ----------
         states : list or str
             List of states (or s single state) to check for
-            (``initialized``, ``running``, ``stopped``,
+            (``uninitialized``, ``initialized``, ``running``, ``stopped``,
             ``waiting``, ``aborted``, ``unknown``)
 
         Returns
@@ -99,6 +99,20 @@ class ControllerHandler():
         response : str
             Service response from the controller manager
         '''
+        # Check if the controller is already loaded
+        all_controllers = self.get_controllers_with_state()
+        loaded_controllers = self.get_controllers_with_state(['running','stopped','initialized'])
+        if self.debug:
+            print("ALL CONTROLLERS")
+            print(all_controllers)
+            print('\n'+"LOADED CONTROLLERS")
+            print(loaded_controllers)
+
+        if str(controller) in loaded_controllers:
+            return True
+        
+        if self.debug:
+            print("LOADING CONTROLLER: %s"%(controller))
         name = self.robot_name+'/controller_manager/load_controller'
         result = utils.call_service(name, LoadController, name=str(controller))
         return result
