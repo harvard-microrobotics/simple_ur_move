@@ -252,7 +252,7 @@ class JointTrajectoryHandler():
                 for waypoint in trajectory:
                     for part in parts_to_convert:
                         if part in waypoint.keys():
-                            waypoint['part'] = np.deg2rad(waypoint['part']).tolist()
+                            waypoint[part] = np.deg2rad(waypoint[part]).tolist()
 
         elif direction == 'from_ros':
             # Convert radians to degrees
@@ -261,7 +261,7 @@ class JointTrajectoryHandler():
                 for waypoint in trajectory:
                     for part in parts_to_convert:
                         if part in waypoint.keys():
-                            waypoint['part'] = np.rad2deg(waypoint['part']).tolist()
+                            waypoint[part] = np.rad2deg(waypoint[part]).tolist()
 
         return trajectory
 

@@ -32,24 +32,31 @@ class TwistHandler():
         ``twist_controller``
     debug : bool
         Turn on debug print statements
+    self_contained : bool
+        Decide whether to set jog speed back to zero when object is deleted.
     """
-    def __init__(self, name, controller='twist_controller', debug=False):
+    def __init__(self, name, controller='twist_controller', debug=False, self_contained=False):
         # Get parameters from roslaunch
         self.debug = debug
         self.robot_name = name
         self.controller_to_use = controller
         self._parse_config(None)
-        self.initialize_time = 4.0 # [sec]
         self.speed_factor = 1.0
+        self.self_contained=self_contained
 
 
         # Set ROS controllers
+        if self.debug:
+            print("Setting controller: %s"%(controller))
         self.controller_handler = ControllerHandler(self.robot_name)
         self.controller_handler.set_controller(self.controller_to_use)
 
         # Publish to the twist command topic
         topic_name = self.robot_name+'/'+self.controller_to_use+'/command'
-        self.twist_publisher = rospy.Publisher(topic_name, Twist, queue_size=10)
+        if self.debug:
+            print("Subscribing to topic: %s"%(topic_name))
+        self.twist_publisher = rospy.Publisher(topic_name, Twist, queue_size=10, latch=True)
+        rospy.sleep(0.5)
 
 
     def load_config(self, filename, directory=None):
@@ -208,7 +215,10 @@ class TwistHandler():
             msg = twist
 
         else:
-            msg = self.build_twist(twist['linear'],twist['angular'])     
+            msg = self.build_twist(twist['linear'],twist['angular'])    
+
+        if self.debug:
+            print(msg) 
 
         self.twist_publisher.publish(msg)
 
@@ -251,7 +261,8 @@ class TwistHandler():
         """
         Shut down gracefully
         """
-        self._set_twist({'linear':[0,0,0], 'angular':[0,0,0]})
+        if self.self_contained:
+            self._set_twist({'linear':[0,0,0], 'angular':[0,0,0]})
 
 
     def __del__(self):

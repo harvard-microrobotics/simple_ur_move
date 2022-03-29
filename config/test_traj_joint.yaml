@@ -2,7 +2,8 @@ settings:
   units: 
     orientation: 'degrees' # euler_degrees, euler_radians, quaternion
 
-  controlled_frame: 'tool0'
+  joint_names: ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint',
+               'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
 
   # Path tolerance (set to null for default)
   path_tolerance: null
@@ -31,25 +32,25 @@ settings:
 
 trajectory:
   - time: 0
-    positions: [-70.0, -115.0, -88.0, -65.0, 88.0, 90.0]
+    positions: [-70.0, -115.0, -88.0, -65.0, 88.0, 20.0]
     velocities: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    #accelerations:
-    #efforts:
+    #accelerations: []
+    #effort: []
 
   - time: 2.0
-    positions: [-70.0, -105.0, -88.0, -65.0, 88.0, 90.0]
+    positions: [-70.0, -105.0, -88.0, -65.0, 88.0, 20.0]
     velocities: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    #accelerations:
-    #efforts:
+    #accelerations: []
+    #effort: []
 
-  - time: 3.0
-    positions: [-90.0, -105.0, -88.0, -65.0, 88.0, 90.0]
+  - time: 4.0
+    positions: [-110.0, -105.0, -88.0, -65.0, 88.0, -20.0]
     velocities: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    #accelerations:
-    #efforts:
+    #accelerations: []
+    #effort: []
   
-  - time: 5.0
-    positions: [-90.0, -115.0, -88.0, -65.0, 88.0, 90.0]
+  - time: 6.0
+    positions: [-110.0, -115.0, -88.0, -65.0, 88.0, -20.0]
     velocities: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    #accelerations:
-    #efforts:
+    #accelerations: []
+    #effort: []

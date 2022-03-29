@@ -205,20 +205,20 @@ traj_handler.shutdown() # Sets speeds back to zero
 import os
 import time
 import rospkg
-from simple_ur_move.cartesian_trajectory_handler import CartesianTrajectoryHandler
+from simple_ur_move.twist_handler import TwistHandler
 
-# Create a trajectory handler
+# Create a twist handler
 traj_handler = TwistHandler(
     name="",
     debug=False)
 
-# Load trajectory config from a file
+# Load config from a file
 filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
 traj_file="twist_config.yaml"
 traj_handler.load_config(filename=traj_file, directory=filepath_config)
 
-# OR Set trajectory config directly
-#config={TRAJECTORY CONFIG DICT}
+# OR Set config directly
+#config={TWIST CONFIG DICT}
 #traj_handler.set_config(config)
 
 # Set a twist of 5 mm/sec in the z-direction

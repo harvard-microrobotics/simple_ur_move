@@ -1,0 +1,4 @@
+settings:
+  units: 
+    linear: 'm/s'      # m/s mm/s 
+    angular: 'degrees' # degrees, radians
