@@ -33,7 +33,6 @@ This package has some useful python objects you can import into your own nodes t
 #### Run a joint trajectory
 1. Set up a trajectory config (see config folder for examples)
 2. `roslaunch simple_ur_move run_joint_trajectory.launch traj:=test_traj_joint.yaml`
-3. `roslaunch simple_ur_move run_joint_trajectory.launch traj:=pick_place_joint.yaml`
 
 **Check out these launch files for information on different joint controllers you can use.**
 
@@ -54,7 +53,7 @@ traj_handler = JointTrajectoryHandler(
 3a. Load the trajectory config from a file
 ```python
 filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
-traj_file="pick_place_joint.yaml"
+traj_file="test_traj_joint.yaml"
 traj_handler.load_config(filename=traj_file, directory=filepath_config)
 ```
 3b. **_OR_** Set trajectory config directly
@@ -83,7 +82,7 @@ traj_handler = JointTrajectoryHandler(
 
 # Load trajectory config from a file
 filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
-traj_file="pick_place_joint.yaml"
+traj_file="test_traj_joint.yaml"
 traj_handler.load_config(filename=traj_file, directory=filepath_config)
 
 # OR Set trajectory config directly
