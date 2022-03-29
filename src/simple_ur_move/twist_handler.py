@@ -56,7 +56,6 @@ class TwistHandler():
         if self.debug:
             print("Subscribing to topic: %s"%(topic_name))
         self.twist_publisher = rospy.Publisher(topic_name, Twist, queue_size=10, latch=True)
-        rospy.sleep(0.5)
 
 
     def load_config(self, filename, directory=None):
