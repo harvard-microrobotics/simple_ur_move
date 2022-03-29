@@ -34,7 +34,7 @@ class CartesianTrajectoryHandler():
     name : str
         Name of the Action Server
     controller : str
-        The cartesian controller to use. options are:
+        The cartesian controller to use. Options are:
         ``forward_cartesian_traj_controller``,
         ``pose_based_cartesian_traj_controller``, and
         ``joint_based_cartesian_traj_controller``.
@@ -125,6 +125,14 @@ class CartesianTrajectoryHandler():
 
 
     def set_initialize_time(self, time):
+        """
+        Set the time the robot takes to get to its initial poisiton
+
+        Parameters
+        ----------
+        time : float
+            Initialization time in seconds. Must be greater than or equal to 0 
+        """
         if time<0:
             raise ValueError("Initialization time cannot be set less than 0")
 
@@ -140,10 +148,18 @@ class CartesianTrajectoryHandler():
 
 
     def set_speed_factor(self, speed_factor):
+        """
+        Set the speed multiplier
+
+        Parameters
+        ----------
+        speed_factor : float
+            Speed multiplier to use
+        """
         if speed_factor<=0:
             raise ValueError("Speed_factor time must be strictly greater than 0")
         else:
-            self.speed_factor=speed_factor
+            self.speed_factor=float(speed_factor)
 
 
     def set_trajectory(self, trajectory):
@@ -288,6 +304,47 @@ class CartesianTrajectoryHandler():
         return trajectory
 
 
+    def build_goal(self, trajectory):
+        """
+        Build the trajectory goal
+
+        Parameters
+        ----------
+        trajectory : dict or cartesian_control_msgs/CartesianTrajectory
+            Trajectory to parse
+
+        Returns
+        -------
+        goal : cartesian_control_msgs/FollowCartesianTrajectoryGoal
+            The goal built from the trajectory
+        """
+        if trajectory is None:
+            rospy.logerr("Cannot build trajectory goal. It was not defined.")
+            return
+
+        if isinstance(trajectory, CartesianTrajectory):
+            traj = trajectory
+        else:
+            traj= self.pack_trajectory(trajectory)
+
+        if self.debug:
+            print("")
+            for row in traj.points:
+                print(row.time_from_start.to_sec(), row.pose.position.x, row.pose.position.y, row.pose.position.z)
+
+        # Pack the trajectory into a trajectory goal        
+        goal = FollowCartesianTrajectoryGoal()
+        goal.trajectory = traj
+        if self.path_tolerance is not None:
+            goal.path_tolerance = self.path_tolerance
+        if self.goal_tolerance is not None:
+            goal.goal_tolerance = self.goal_tolerance
+        if self.goal_time_tolerance is not None:
+            goal.goal_time_tolerance = self.goal_time_tolerance
+
+        return goal
+
+    
     def _run_trajectory(self, trajectory, blocking=True):
         """
         Run a single trajectory
@@ -303,23 +360,11 @@ class CartesianTrajectoryHandler():
             rospy.logerr("Cannot run trajectory. It was not defined.")
             return
 
-        if isinstance(trajectory, CartesianTrajectory):
-            traj = trajectory
+        if isinstance(trajectory, FollowCartesianTrajectoryGoal):
+            goal = trajectory
+
         else:
-            traj= self.pack_trajectory(trajectory)
-        
-        if self.debug:
-            print("")
-            for row in traj.points:
-                print(row.time_from_start.to_sec(), row.pose.position.x, row.pose.position.y, row.pose.position.z)
-        goal = FollowCartesianTrajectoryGoal()
-        goal.trajectory = traj
-        if self.path_tolerance is not None:
-            goal.path_tolerance = self.path_tolerance
-        if self.goal_tolerance is not None:
-            goal.goal_tolerance = self.goal_tolerance
-        if self.goal_time_tolerance is not None:
-            goal.goal_time_tolerance = self.goal_time_tolerance
+            goal = self.build_goal(trajectory)     
 
         self.trajectory_client.send_goal(goal)
 
@@ -352,11 +397,11 @@ class CartesianTrajectoryHandler():
 
     def run_trajectory(self, trajectory=None, blocking=True, perform_init=True):
         """
-        Run the current trajectory
+        Run a trajectory.
 
         Parameters
         ----------
-        trajectory : dict or cartesian_control_msgs/CartesianTrajectory
+        trajectory : dict, CartesianTrajectory, FollowCartesianTrajectoryGoal
             Trajectory to run. If excluded, the currently loaded trajectory is run
         blocking : bool
             Whether to wait for the trajectory to finish.
@@ -370,7 +415,20 @@ class CartesianTrajectoryHandler():
         else:
             trajectory = copy.deepcopy(trajectory)
 
-        if isinstance(trajectory, CartesianTrajectory):
+        if isinstance(trajectory, FollowCartesianTrajectoryGoal):
+            first_pt = trajectory.trajectory.points[0]
+            #Adjust speeds
+            for pt in trajectory.trajectory.points:
+                pt.time_from_start = rospy.Duration(pt.time_from_start.to_sec()/self.speed_factor)
+                if pt.twist is not None:
+                    pt.twist.linear.x = pt.twist.linear.x*self.speed_factor
+                    pt.twist.linear.y = pt.twist.linear.y*self.speed_factor
+                    pt.twist.linear.z = pt.twist.linear.z*self.speed_factor
+                    pt.twist.angular.x = pt.twist.angular.x*self.speed_factor
+                    pt.twist.angular.y = pt.twist.angular.y*self.speed_factor
+                    pt.twist.angular.z = pt.twist.angular.z*self.speed_factor
+
+        elif isinstance(trajectory, CartesianTrajectory):
             first_pt = trajectory.points[0]
             #Adjust speeds
             for pt in trajectory.points:

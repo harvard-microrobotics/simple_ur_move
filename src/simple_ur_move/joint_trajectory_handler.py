@@ -35,10 +35,12 @@ class JointTrajectoryHandler():
     name : str
         Name of the Action Server
     controller : str
-        The cartesian controller to use. options are:
-        ``forward_cartesian_traj_controller``,
-        ``pose_based_cartesian_traj_controller``, and
-        ``joint_based_cartesian_traj_controller``.
+        The joint controller to use. Options are:
+        ``scaled_pos_joint_traj_controller``,
+        ``scaled_vel_joint_traj_controller``,
+        ``pos_joint_traj_controller``,
+        ``vel_joint_traj_controller``, and
+        ``forward_joint_traj_controller``.
     debug : bool
         Turn on debug print statements
     """
@@ -126,6 +128,14 @@ class JointTrajectoryHandler():
 
 
     def set_initialize_time(self, time):
+        """
+        Set the time the robot takes to get to its initial poisiton
+
+        Parameters
+        ----------
+        time : float
+            Initialization time in seconds. Must be greater than or equal to 0 
+        """
         if time<0:
             raise ValueError("Initialization time cannot be set less than 0")
 
@@ -141,6 +151,14 @@ class JointTrajectoryHandler():
 
 
     def set_speed_factor(self, speed_factor):
+        """
+        Set the speed multiplier
+
+        Parameters
+        ----------
+        speed_factor : float
+            Speed multiplier to use
+        """
         if speed_factor<=0:
             raise ValueError("Speed_factor time must be strictly greater than 0")
         else:
@@ -256,6 +274,11 @@ class JointTrajectoryHandler():
         ----------
         trajectory : dict or trajectory_msgs/JointTrajectory
             Trajectory to parse
+
+        Returns
+        -------
+        goal : trajectory_msgs/FollowJointTrajectoryGoal
+            The goal built from the trajectory
         """
         if trajectory is None:
             rospy.logerr("Cannot build trajectory goal. It was not defined.")
@@ -320,7 +343,6 @@ class JointTrajectoryHandler():
         point : dict or trajectory_msgs/JointTrajectoryPoint
             Trajectory point to go to
         """
-        
         if isinstance(point, JointTrajectoryPoint):
             start_pt = copy.deepcopy(point)
             start_pt.time_from_start = rospy.Duration(self.initialize_time)
@@ -340,7 +362,7 @@ class JointTrajectoryHandler():
 
         Parameters
         ----------
-        trajectory : dict or trajectory_msgs/JointTrajectory
+        trajectory : dict, JointTrajectory, FollowJointTrajectoryGoal
             Trajectory to run. If excluded, the currently loaded trajectory is run
         blocking : bool
             Whether to wait for the trajectory to finish.
@@ -357,7 +379,6 @@ class JointTrajectoryHandler():
         if isinstance(trajectory, FollowJointTrajectoryGoal):
             first_pt = trajectory.trajectory.points[0]
             #Adjust speeds
-            times = []
             for pt in trajectory.trajectory.points:
                 pt.time_from_start = rospy.Duration(pt.time_from_start.to_sec()/self.speed_factor)
                 if pt.velocities is not None:
@@ -365,8 +386,6 @@ class JointTrajectoryHandler():
                 if pt.accelerations is not None:
                     pt.accelerations = (np.array(pt.accelerations)*self.speed_factor).tolist()
                 
-                times.append(pt.time_from_start.to_sec())
-
         elif isinstance(trajectory, JointTrajectory):
             first_pt = trajectory.points[0]
 
