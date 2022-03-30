@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- Get arguements  -->
+	<arg name="config" default="twist_config.yaml" doc="The trajectory you want to run." />
+	<arg name="robot_name" default="" doc="Name of the robot. Leave blank if not specifying" />
+    <arg name="controller" default="twist_controller" doc="Must be 'twist_controller'" />
+    <arg name="debug" default="False" doc="Whether debug is on" />
+
+
+	<!-- start the run node and pass it all of the parameters -->
+    <node name="ur_twist_node" pkg="simple_ur_move" type="set_twist.py" respawn="false"
+    	output="screen">
+        <param name="config" type="str" value="$(arg config)" />
+        <param name="controller" type="str" value="$(arg controller)" />
+		<param name="robot_name" type="str" value="$(arg robot_name)" />
+        <param name="debug" type="bool" value="$(arg debug)"/>
+    </node>
+</launch>

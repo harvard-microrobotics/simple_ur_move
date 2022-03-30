@@ -3,6 +3,8 @@
 import rospy
 from controller_manager_msgs.srv import LoadController, UnloadController, SwitchController, ListControllers
 import simple_ur_move.utils as utils
+from ur_msgs.srv import SetSpeedSliderFraction
+from std_srvs.srv import TriggerRequest
    
 reserved_controllers = ['joint_state_controller', 'robot_status_controller', 'force_torque_sensor_controller', 'speed_scaling_state_controller']
 
@@ -195,3 +197,52 @@ class ControllerHandler():
                 
         self.load_controller(controller)
         self.switch_controller([controller],controllers_to_unload)
+
+
+    def set_speed_slider(self, fraction):
+        '''
+        Set the speed slider fraction
+
+        Parameters
+        ----------
+        fraction : float
+            Slider fraction to set (0.02 to 1.00)
+
+        Returns
+        -------
+        result : srv
+            The result of the service call
+        '''
+        name = self.robot_name+'/ur_hardware_interface/set_speed_slider'
+        result = utils.call_service(name, SetSpeedSliderFraction, speed_slider_fraction=fraction)
+        return result
+
+
+    def play_program(self):
+        '''
+        Start the program on the teach pendant.
+        This ony works if you are in remote control mode
+
+        Returns
+        -------
+        result : srv
+            The result of the service call
+        '''
+        name = self.robot_name+'/ur_hardware_interface/dashboard/play'
+        result = utils.call_service(name, TriggerRequest)
+        return result
+
+
+    def stop_program(self):
+        '''
+        Stop the program on the teach pendant.
+        This ony works if you are in remote control mode
+
+        Returns
+        -------
+        result : srv
+            The result of the service call
+        '''
+        name = self.robot_name+'/ur_hardware_interface/dashboard/stop'
+        result = utils.call_service(name, TriggerRequest)
+        return result
