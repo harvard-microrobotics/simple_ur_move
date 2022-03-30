@@ -171,7 +171,7 @@ class JointTrajectoryHandler():
 
         Parameters
         ----------
-        trajectory : dict or trajectory_msgs/JointTrajectory
+        trajectory : list or trajectory_msgs/JointTrajectory
             Trajectory to parse
 
         Raises
@@ -179,8 +179,8 @@ class JointTrajectoryHandler():
         ValueError : If a trajectory of incorrect type is passed
         """
         
-        if not isinstance(trajectory, JointTrajectory) and not isinstance(trajectory, dict):
-            raise ValueError("Joint trajectories must be of type dict or trajectory_msgs/JointTrajectory")
+        if not isinstance(trajectory, JointTrajectory) and not isinstance(trajectory, list):
+            raise ValueError("Joint trajectories must be of type list or trajectory_msgs/JointTrajectory")
         else:
             self.trajectory = trajectory
 
@@ -191,7 +191,7 @@ class JointTrajectoryHandler():
 
         Parameters
         ----------
-        trajectory : dict
+        trajectory : list
             Trajectory to parse
         
         Returns
@@ -235,14 +235,14 @@ class JointTrajectoryHandler():
 
         Parameters
         ----------
-        trajectory : dict
+        trajectory : list
             Trajectory to parse
         direction : str
             Which direction to convert. Options are ``to_ros`` or ``from_ros``.
         
         Returns
         -------
-        trajectory : dict
+        trajectory : list
             Converted trajectory
         """
         if direction == 'to_ros':
