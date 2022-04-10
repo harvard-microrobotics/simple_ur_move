@@ -206,7 +206,7 @@ class JointTrajectoryHandler():
         traj_packed = []
         for waypoint in traj_to_use:
             if self.debug:
-                print('quaternion: ',waypoint['orientation'])
+                print('orientation: ',waypoint['orientation'])
             pt = JointTrajectoryPoint()
             pt.positions = waypoint['positions']
 
