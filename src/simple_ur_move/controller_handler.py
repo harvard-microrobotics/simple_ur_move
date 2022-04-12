@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Import ROS stuff
 import rospy
 from controller_manager_msgs.srv import LoadController, UnloadController, SwitchController, ListControllers
