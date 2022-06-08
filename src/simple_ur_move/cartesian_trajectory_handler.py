@@ -350,6 +350,21 @@ class CartesianTrajectoryHandler():
 
 
     def _interp_quaternion(self,x, y):
+        """
+        Interpolate quaterions
+
+        Parameters
+        ----------
+        x : list
+            A list of M time points
+        y : list of lists
+            An array of Mx4 quaternions
+
+        Returns
+        -------
+        interp_fun : function
+            Interpolation function 
+        """
         diff = x[-1]-x[0]
         x_init = x[0]
 
@@ -361,22 +376,38 @@ class CartesianTrajectoryHandler():
 
 
     def _interpolate_trajectory(self, traj):
+        """
+        Interpolate trajectories in time based on the ``interp_time`` set the config.
+
+        Parameters
+        ----------
+        traj : cartesian_control_msgs/CartesianTrajectory
+            A trajectory to interpolate
+
+        Returns
+        -------
+        traj_interp : cartesian_control_msgs/CartesianTrajectory
+            A new trajectory with time points interpolated.
+        """
         points = traj.points
         num_points = len(points)
         if num_points<2:
             return traj
 
+        # Loop through all the points in the trajectory
         new_traj = []
         for idx in range(num_points-1):
             curr_point = points[idx]
             next_point = points[idx+1]
 
+            # Get the times
             curr_time = curr_point.time_from_start.to_sec()
             next_time = next_point.time_from_start.to_sec()
 
             times = np.arange(curr_time, next_time, self.interp_time)
 
 
+            # Get an interpolation function for the position
             curr_position = [curr_point.pose.position.x, curr_point.pose.position.y, curr_point.pose.position.z]
             next_position = [next_point.pose.position.x, next_point.pose.position.y, next_point.pose.position.z]
 
@@ -386,6 +417,7 @@ class CartesianTrajectoryHandler():
                 axis=1,
                 )
 
+            # Get an interpolation function for the orientation
             curr_orientation = [curr_point.pose.orientation.x, curr_point.pose.orientation.y, curr_point.pose.orientation.z, curr_point.pose.orientation.w]
             next_orientation = [next_point.pose.orientation.x, next_point.pose.orientation.y, next_point.pose.orientation.z, next_point.pose.orientation.w]
 
@@ -394,9 +426,11 @@ class CartesianTrajectoryHandler():
                 np.vstack((curr_orientation, next_orientation)),
                 )
 
+            # Calculate the linear velocity
             linear_vel=np.subtract(next_position, curr_position)/(next_time-curr_time)
 
 
+            # Build a new trajectory move
             new_pts = []
             for time in times:
                 new_pt = copy.deepcopy(curr_point)
@@ -405,21 +439,19 @@ class CartesianTrajectoryHandler():
                 new_pt.pose.orientation = Quaternion(*ori_interp(time).tolist())
 
                 #if new_pt.twist is not None:
-                #    new_pt.twist = Twist(linear=Vector3(*linear_vel.tolist()),
-                #               angular=Vector3(0,0,0))
+                new_pt.twist = Twist(linear=Vector3(*linear_vel.tolist()),
+                           angular=Vector3(0,0,0))
                 
-
                 new_pts.append(new_pt)
 
-
+            # Add new moves to the new trajectory
             new_traj.extend(new_pts)
 
-
+        # Add the final point
         final_point = copy.deepcopy(points[-1])
-        #final_point.twist = Twist(linear=Vector3(0,0,0),
-        #                       angular=Vector3(0,0,0))
+        final_point.twist = Twist(linear=Vector3(0,0,0),
+                               angular=Vector3(0,0,0))
         new_traj.append(final_point)
-
 
         return CartesianTrajectory(points=new_traj, controlled_frame=traj.controlled_frame)
 
