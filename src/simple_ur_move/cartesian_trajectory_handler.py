@@ -22,6 +22,7 @@ import os
 import sys
 import copy
 import numpy as np
+from scipy.interpolate import interp1d
 
 filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
 
@@ -117,6 +118,8 @@ class CartesianTrajectoryHandler():
         if self.settings is None:
             return
 
+        self.interp_time = self.settings.get('interp_time',0.01)
+        self.interp_traj = self.settings.get('interpolate',True)
         self.units = self.settings.get('units',None)
         self.path_tolerance=self.settings.get('path_tolerance',None)
         self.goal_tolerance=self.settings.get('goal_tolerance',None)
@@ -275,7 +278,7 @@ class CartesianTrajectoryHandler():
             # Convert euler angles to quaternians
             if 'euler' in self.units['orientation']:
                 for waypoint in trajectory:
-                    waypoint['orientation'] = quaternion_from_euler(*waypoint['orientation'])
+                    waypoint['orientation'] = quaternion_from_euler(*waypoint['orientation'], axes='sxyz')
                     if waypoint.get('linear_velocity', False):
                         waypoint['linear_velocity'] = quaternion_from_euler(*waypoint['linear_velocity'])
 
@@ -344,6 +347,82 @@ class CartesianTrajectoryHandler():
 
         return goal
 
+
+
+    def _interp_quaternion(self,x, y):
+        diff = x[-1]-x[0]
+        x_init = x[0]
+
+        def fun(x0):
+            p = (x0-x_init)/diff
+            return utils.quaternion_avg_markley(y, [1-p, p])
+
+        return fun
+
+
+    def _interpolate_trajectory(self, traj):
+        points = traj.points
+        num_points = len(points)
+        if num_points<2:
+            return traj
+
+        new_traj = []
+        for idx in range(num_points-1):
+            curr_point = points[idx]
+            next_point = points[idx+1]
+
+            curr_time = curr_point.time_from_start.to_sec()
+            next_time = next_point.time_from_start.to_sec()
+
+            times = np.arange(curr_time, next_time, self.interp_time)
+
+
+            curr_position = [curr_point.pose.position.x, curr_point.pose.position.y, curr_point.pose.position.z]
+            next_position = [next_point.pose.position.x, next_point.pose.position.y, next_point.pose.position.z]
+
+            pos_interp = interp1d(
+                np.hstack((curr_time, next_time)),
+                np.vstack((curr_position, next_position)).T,
+                axis=1,
+                )
+
+            curr_orientation = [curr_point.pose.orientation.x, curr_point.pose.orientation.y, curr_point.pose.orientation.z, curr_point.pose.orientation.w]
+            next_orientation = [next_point.pose.orientation.x, next_point.pose.orientation.y, next_point.pose.orientation.z, next_point.pose.orientation.w]
+
+            ori_interp = self._interp_quaternion(
+                np.hstack((curr_time, next_time)),
+                np.vstack((curr_orientation, next_orientation)),
+                )
+
+            linear_vel=np.subtract(next_position, curr_position)/(next_time-curr_time)
+
+
+            new_pts = []
+            for time in times:
+                new_pt = copy.deepcopy(curr_point)
+                new_pt.time_from_start = rospy.Duration(time)
+                new_pt.pose.position = Point(*pos_interp(time).tolist())
+                new_pt.pose.orientation = Quaternion(*ori_interp(time).tolist())
+
+                #if new_pt.twist is not None:
+                #    new_pt.twist = Twist(linear=Vector3(*linear_vel.tolist()),
+                #               angular=Vector3(0,0,0))
+                
+
+                new_pts.append(new_pt)
+
+
+            new_traj.extend(new_pts)
+
+
+        final_point = copy.deepcopy(points[-1])
+        #final_point.twist = Twist(linear=Vector3(0,0,0),
+        #                       angular=Vector3(0,0,0))
+        new_traj.append(final_point)
+
+
+        return CartesianTrajectory(points=new_traj, controlled_frame=traj.controlled_frame)
+
     
     def _run_trajectory(self, trajectory, blocking=True):
         """
@@ -364,12 +443,18 @@ class CartesianTrajectoryHandler():
             goal = trajectory
 
         else:
-            goal = self.build_goal(trajectory)     
+            goal = self.build_goal(trajectory)
+
+
+        # Interpolate the trajectory for smoothness
+        if self.interp_traj:
+            goal.trajectory = self._interpolate_trajectory(goal.trajectory)
 
         self.trajectory_client.send_goal(goal)
 
         if blocking:
             self.trajectory_client.wait_for_result()
+
 
 
     def go_to_point(self, point):
