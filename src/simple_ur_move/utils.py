@@ -1,6 +1,7 @@
 import rospy
 import yaml
 import numpy as np
+from scipy.interpolate import CubicSpline
 
 def call_service(service_name, service_type, **fargs):
     '''
@@ -83,11 +84,19 @@ def save_yaml(data, filename):
 
 def quaternion_avg_markley(Q, weights=None):
     '''
-    Averaging Quaternions.
+    Save a yaml file
 
-    Arguments:
-        Q(ndarray): an Mx4 ndarray of quaternions.
-        weights(list): an M elements list, a weight for each quaternion.
+    Parameters
+    ----------
+    Q : numpy.ndarray
+        An Mx4 ndarray of quaternions
+    weights : list
+        an M elements list, a weight for each quaternion
+
+    Returns
+    -------
+    mean : List (quaternion)
+        The weighted average quaternion
     '''
 
     if weights is None:
@@ -111,3 +120,75 @@ def quaternion_avg_markley(Q, weights=None):
 
     # Get the eigenvector corresponding to largest eigen value
     return np.linalg.eigh(A)[1][:, -1]
+
+
+def interp_spline(x, y, bc_start=None, bc_end=None):
+    """
+    Interpolate using a spline
+
+    Parameters
+    ----------
+    x : list
+        Input values (Nx1)
+    y : list
+        Output values (NxM)
+    bc_start : list
+        Boundary conditions for the start point (Nx1). If ``None``, zero is used
+    bc_end : list
+        Boundary conditions for the end point (Nx1). If ``None``, zero is used
+
+    Returns
+    -------
+    interp_fun : function
+        Interpolation function
+    """
+    x=np.array(x)
+    y=np.array(y)
+    
+    cs=[]
+
+    if bc_start is None:
+        bc_start = np.zeros((len(x)))
+    if bc_end is None:
+        bc_end = np.zeros((len(x)))
+
+    for y0, bc_0, bc_1  in zip(y, bc_start, bc_end):
+        cs.append(CubicSpline(x,y0, bc_type=((1, bc_0), (1, bc_1))))
+        
+    def fun(x0):
+        vals=np.zeros((len(x0),len(cs)))
+        for idx, cs_curr in enumerate(cs):
+            vals[:,idx] = cs_curr(x0)
+        return vals
+            
+    return fun
+
+
+def interp_quaternion(self,x, y):
+    """
+    Interpolate quaterions
+
+    Parameters
+    ----------
+    x : list
+        A list of M time points
+    y : list of lists
+        An array of Mx4 quaternions
+    bc_start : list
+        Boundary conditions for the start point (Mx4). If ``None``, zero is used
+    bc_end : list
+        Boundary conditions for the end point (Mx4). If ``None``, zero is used
+
+    Returns
+    -------
+    interp_fun : function
+        Interpolation function 
+    """
+    diff = x[-1]-x[0]
+    x_init = x[0]
+
+    def fun(x0):
+        p = (x0-x_init)/diff
+        return quaternion_avg_markley(y, [1-p, p])
+
+    return fun

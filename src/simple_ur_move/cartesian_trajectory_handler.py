@@ -348,33 +348,6 @@ class CartesianTrajectoryHandler():
         return goal
 
 
-
-    def _interp_quaternion(self,x, y):
-        """
-        Interpolate quaterions
-
-        Parameters
-        ----------
-        x : list
-            A list of M time points
-        y : list of lists
-            An array of Mx4 quaternions
-
-        Returns
-        -------
-        interp_fun : function
-            Interpolation function 
-        """
-        diff = x[-1]-x[0]
-        x_init = x[0]
-
-        def fun(x0):
-            p = (x0-x_init)/diff
-            return utils.quaternion_avg_markley(y, [1-p, p])
-
-        return fun
-
-
     def _interpolate_trajectory(self, traj):
         """
         Interpolate trajectories in time based on the ``interp_time`` set the config.
@@ -411,17 +384,25 @@ class CartesianTrajectoryHandler():
             curr_position = [curr_point.pose.position.x, curr_point.pose.position.y, curr_point.pose.position.z]
             next_position = [next_point.pose.position.x, next_point.pose.position.y, next_point.pose.position.z]
 
-            pos_interp = interp1d(
+            try:
+                curr_velocity = [curr_point.twist.linear.x, curr_point.twist.linear.y, curr_point.twist.linear.z]
+                next_velocity = [next_point.twist.linear.x, next_point.twist.linear.y, next_point.twist.linear.z]
+            except:
+                curr_velocity = None
+                next_velocity = None
+
+            pos_interp = utils.interp_spline(
                 np.hstack((curr_time, next_time)),
                 np.vstack((curr_position, next_position)).T,
-                axis=1,
+                bc_start=curr_velocity,
+                bcend=next_velocity,
                 )
 
             # Get an interpolation function for the orientation
             curr_orientation = [curr_point.pose.orientation.x, curr_point.pose.orientation.y, curr_point.pose.orientation.z, curr_point.pose.orientation.w]
             next_orientation = [next_point.pose.orientation.x, next_point.pose.orientation.y, next_point.pose.orientation.z, next_point.pose.orientation.w]
 
-            ori_interp = self._interp_quaternion(
+            ori_interp = utils.interp_quaternion(
                 np.hstack((curr_time, next_time)),
                 np.vstack((curr_orientation, next_orientation)),
                 )
