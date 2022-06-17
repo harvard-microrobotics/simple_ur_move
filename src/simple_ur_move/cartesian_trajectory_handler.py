@@ -119,7 +119,7 @@ class CartesianTrajectoryHandler():
             return
 
         self.interp_time = self.settings.get('interp_time',0.01)
-        self.interp_traj = self.settings.get('interpolate',True)
+        self.interp_traj = self.settings.get('interpolate','smooth')
         self.units = self.settings.get('units',None)
         self.path_tolerance=self.settings.get('path_tolerance',None)
         self.goal_tolerance=self.settings.get('goal_tolerance',None)
@@ -348,7 +348,7 @@ class CartesianTrajectoryHandler():
         return goal
 
 
-    def _interpolate_trajectory(self, traj):
+    def _interpolate_trajectory(self, traj, smooth=True):
         """
         Interpolate trajectories in time based on the ``interp_time`` set the config.
 
@@ -356,6 +356,8 @@ class CartesianTrajectoryHandler():
         ----------
         traj : cartesian_control_msgs/CartesianTrajectory
             A trajectory to interpolate
+        smooth : bool
+            Whether smooth or linear interpolation should be used.
 
         Returns
         -------
@@ -391,12 +393,20 @@ class CartesianTrajectoryHandler():
                 curr_velocity = None
                 next_velocity = None
 
-            pos_interp = utils.interp_spline(
-                np.hstack((curr_time, next_time)),
-                np.vstack((curr_position, next_position)).T,
-                bc_start=curr_velocity,
-                bcend=next_velocity,
-                )
+            
+            if smooth:
+                pos_interp = utils.interp_spline(
+                    np.hstack((curr_time, next_time)),
+                    np.vstack((curr_position, next_position)).T,
+                    bc_start=curr_velocity,
+                    bcend=next_velocity,
+                    )
+            else:
+                pos_interp = interp1(
+                    np.hstack((curr_time, next_time)),
+                    np.vstack((curr_position, next_position)).T,
+                    axis=1,
+                    )
 
             # Get an interpolation function for the orientation
             curr_orientation = [curr_point.pose.orientation.x, curr_point.pose.orientation.y, curr_point.pose.orientation.z, curr_point.pose.orientation.w]
@@ -460,8 +470,10 @@ class CartesianTrajectoryHandler():
 
 
         # Interpolate the trajectory for smoothness
-        if self.interp_traj:
-            goal.trajectory = self._interpolate_trajectory(goal.trajectory)
+        if self.interp_traj=='smooth':
+            goal.trajectory = self._interpolate_trajectory(goal.trajectory, smooth=True)
+        elif self.interp_traj=='linear':
+            goal.trajectory = self._interpolate_trajectory(goal.trajectory, smooth=False)
 
         self.trajectory_client.send_goal(goal)
 
