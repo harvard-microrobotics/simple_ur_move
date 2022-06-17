@@ -439,8 +439,8 @@ class CartesianTrajectoryHandler():
                 new_pt.pose.orientation = Quaternion(*ori_interp(time).tolist())
 
                 #if new_pt.twist is not None:
-                new_pt.twist = Twist(linear=Vector3(*linear_vel.tolist()),
-                           angular=Vector3(0,0,0))
+                # new_pt.twist = Twist(linear=Vector3(*linear_vel.tolist()),
+                #            angular=Vector3(0,0,0))
                 
                 new_pts.append(new_pt)
 
