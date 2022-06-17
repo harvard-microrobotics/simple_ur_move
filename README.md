@@ -17,7 +17,7 @@ This package has some useful python objects you can import into your own nodes t
     - You can also go to specific joint configurations via the `go_to_point()` function.
 - `CartesianTrajectoryHandler`: Sends end effector pose trajectories to the robot.
     - Choose between several [UR ROS controllers](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/doc/controllers.md): `pose_based_cartesian_traj_controller`, `joint_based_cartesian_traj_controller`, and `forward_cartesian_traj_controller`
-    - You can also go to specific poses via the `go_to_point()` function.
+    - You can also go to specific cartesian poses via the `go_to_point()` function.
 - `TwistHandler`: Sends cartesian end effector velocities to the robot.
     - This uses the `twist_controller` from the [UR ROS controllers](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/doc/controllers.md).
 
@@ -50,7 +50,7 @@ traj_handler = JointTrajectoryHandler(
     controller="scaled_pos_joint_traj_controller",
     debug=False)
 ```
-3a. Load the trajectory config from a file
+3a. Load the trajectory/config from a file
 ```python
 filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
 traj_file="test_traj_joint.yaml"
@@ -66,6 +66,12 @@ traj_handler.set_config(config)
 traj_handler.set_initialize_time(3.0)
 traj_handler.run_trajectory(blocking=True)
 traj_handler.shutdown()
+```
+5. Move directly to a point
+```python
+point={'position',[0,0,0,0,0,0]}    # Define the home configuration
+traj_handler.set_initialize_time(3.0) # Set the transition time
+traj_handler.go_to_point(point)      # Go to the point
 ```
 
 **All together:**
@@ -93,6 +99,11 @@ traj_handler.load_config(filename=traj_file, directory=filepath_config)
 traj_handler.set_initialize_time(3.0)
 traj_handler.run_trajectory(blocking=True)
 traj_handler.shutdown()
+
+# OR: Go directly to a single point
+point={'position',[0,0,0,0,0,0]}    # Define the home configuration
+traj_handler.set_initialize_time(3.0) # Set the transition time here
+traj_handler.go_to_point(point)      # Go to the point
 ```
 
 ### Using the cartesian command interface
@@ -118,7 +129,7 @@ traj_handler = CartesianTrajectoryHandler(
     controller="pose_based_cartesian_traj_controller",
     debug=False)
 ```
-3a. Load the trajectory config from a file
+3a. Load the trajectory/config from a file
 ```python
 filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
 traj_file="pick_place.yaml"
@@ -134,6 +145,12 @@ traj_handler.set_config(config)
 traj_handler.set_initialize_time(3.0)
 traj_handler.run_trajectory(blocking=True)
 traj_handler.shutdown()
+```
+5. Move directly to a point
+```python
+point={'position',[0.5, 0.5, 0.2]}    # Define the point
+traj_handler.set_initialize_time(3.0) # Set the transition time
+traj_handler.go_to_point(point)      # Go to the point
 ```
 
 **All together:**
@@ -161,6 +178,11 @@ traj_handler.load_config(filename=traj_file, directory=filepath_config)
 traj_handler.set_initialize_time(3.0)
 traj_handler.run_trajectory(blocking=True)
 traj_handler.shutdown()
+
+# OR: Go directly to a single point
+point={'position',[0.5, 0.5, 0.2]}    # Define the point
+traj_handler.set_initialize_time(3.0) # Set the transition time here
+traj_handler.go_to_point(point)      # Go to the point
 ```
 
 
