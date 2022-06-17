@@ -395,8 +395,11 @@ class CartesianTrajectoryHandler():
                 np.hstack((curr_time, next_time)),
                 np.vstack((curr_position, next_position)).T,
                 bc_start=curr_velocity,
-                bcend=next_velocity,
+                bc_end=next_velocity,
                 )
+
+            print(curr_position,next_position)
+            print(pos_interp([curr_time,next_time]))
 
             # Get an interpolation function for the orientation
             curr_orientation = [curr_point.pose.orientation.x, curr_point.pose.orientation.y, curr_point.pose.orientation.z, curr_point.pose.orientation.w]
@@ -414,6 +417,7 @@ class CartesianTrajectoryHandler():
             # Build a new trajectory move
             new_pts = []
             for time in times:
+                print(time, pos_interp(time))
                 new_pt = copy.deepcopy(curr_point)
                 new_pt.time_from_start = rospy.Duration(time)
                 new_pt.pose.position = Point(*pos_interp(time).tolist())

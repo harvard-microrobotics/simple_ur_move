@@ -156,7 +156,8 @@ def interp_spline(x, y, bc_start=None, bc_end=None):
         cs.append(CubicSpline(x,y0, bc_type=((1, bc_0), (1, bc_1))))
         
     def fun(x0):
-        vals=np.zeros((len(x0),len(cs)))
+        x0=np.array(x0)
+        vals=np.zeros((x0.size,len(cs)))
         for idx, cs_curr in enumerate(cs):
             vals[:,idx] = cs_curr(x0)
         return vals
@@ -164,7 +165,7 @@ def interp_spline(x, y, bc_start=None, bc_end=None):
     return fun
 
 
-def interp_quaternion(self,x, y):
+def interp_quaternion(x, y):
     """
     Interpolate quaterions
 
