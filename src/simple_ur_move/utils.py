@@ -160,6 +160,8 @@ def interp_spline(x, y, bc_start=None, bc_end=None):
         vals=np.zeros((x0.size,len(cs)))
         for idx, cs_curr in enumerate(cs):
             vals[:,idx] = cs_curr(x0)
+
+        vals = np.squeeze(vals)
         return vals
             
     return fun

@@ -118,7 +118,7 @@ class CartesianTrajectoryHandler():
         if self.settings is None:
             return
 
-        self.interp_time = self.settings.get('interp_time',0.01)
+        self.interp_time = self.settings.get('interp_time',0.005)
         self.interp_traj = self.settings.get('interpolate','smooth')
         self.units = self.settings.get('units',None)
         self.path_tolerance=self.settings.get('path_tolerance',None)
@@ -364,6 +364,9 @@ class CartesianTrajectoryHandler():
         traj_interp : cartesian_control_msgs/CartesianTrajectory
             A new trajectory with time points interpolated.
         """
+        if self.debug:
+            print("Smooth: %d"%(smooth))
+
         points = traj.points
         num_points = len(points)
         if num_points<2:
@@ -408,9 +411,6 @@ class CartesianTrajectoryHandler():
                     axis=1,
                     )
 
-            print(curr_position,next_position)
-            print(pos_interp([curr_time,next_time]))
-
             # Get an interpolation function for the orientation
             curr_orientation = [curr_point.pose.orientation.x, curr_point.pose.orientation.y, curr_point.pose.orientation.z, curr_point.pose.orientation.w]
             next_orientation = [next_point.pose.orientation.x, next_point.pose.orientation.y, next_point.pose.orientation.z, next_point.pose.orientation.w]
@@ -427,7 +427,6 @@ class CartesianTrajectoryHandler():
             # Build a new trajectory move
             new_pts = []
             for time in times:
-                print(time, pos_interp(time))
                 new_pt = copy.deepcopy(curr_point)
                 new_pt.time_from_start = rospy.Duration(time)
                 new_pt.pose.position = Point(*pos_interp(time).tolist())
