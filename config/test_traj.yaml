@@ -4,6 +4,7 @@ settings:
     orientation: 'euler_degrees' # euler_degrees, euler_radians, quaternion
 
   controlled_frame: 'tool0'
+  interpolate: True
 
   # Path tolerance (set to null for default)
   path_tolerance: null

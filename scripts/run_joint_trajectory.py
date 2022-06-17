@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Import ROS stuff
 import rospy
 import rospkg
