@@ -5,6 +5,7 @@ settings:
 
   controlled_frame: 'tool0'
   interpolate: 'smooth' # 'smooth' or 'linear'
+  interp_time: 0.005
 
   # Path tolerance (set to null for default)
   path_tolerance: null

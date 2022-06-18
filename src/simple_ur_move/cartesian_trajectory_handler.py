@@ -24,7 +24,11 @@ import copy
 import numpy as np
 from scipy.interpolate import interp1d
 
-filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
+try:
+    filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
+except:
+    filepath_config = "../../config"
+
 
 class CartesianTrajectoryHandler():
     """
@@ -176,7 +180,8 @@ class CartesianTrajectoryHandler():
 
         Raises
         ------
-        ValueError : If a trajectory of incorrect type is passed
+        ValueError
+            If a trajectory of incorrect type is passed
         """
         
         if not isinstance(trajectory, CartesianTrajectory) and not isinstance(trajectory, list):
@@ -518,6 +523,8 @@ class CartesianTrajectoryHandler():
             Trajectory to run. If excluded, the currently loaded trajectory is run
         blocking : bool
             Whether to wait for the trajectory to finish.
+        perform_init : bool
+            Whether to move to the initial point (using ``initialize_time``) or skip it.
         """
         if trajectory is None:
             if self.trajectory is None:

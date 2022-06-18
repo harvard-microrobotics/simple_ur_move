@@ -37,7 +37,7 @@ This package has some useful python objects you can import into your own nodes t
 **Check out these launch files for information on different joint controllers you can use.**
 
 #### Use the joint trajectory handler
-1. Import nessecary packages
+1. Import necessary packages
 ```python
 import os
 import rospkg

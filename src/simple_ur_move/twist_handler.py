@@ -17,7 +17,10 @@ import sys
 import copy
 import numpy as np
 
-filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
+try:
+    filepath_config = os.path.join(rospkg.RosPack().get_path('simple_ur_move'), 'config')
+except:
+    filepath_config = "../../config"
 
 class TwistHandler():
     """
