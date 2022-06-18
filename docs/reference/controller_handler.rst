@@ -1,4 +1,4 @@
-.. _joint_trajectory_api:
+.. _controller_api:
 
 ==================
 Controller Handler

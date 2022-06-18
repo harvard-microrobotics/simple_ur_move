@@ -34,6 +34,14 @@ a:hover{
     color: #56a2d6;
 }
 
+.rst-content code, .rst-content tt, code{
+    color: #8d60b0;
+}
+
+.rst-content code.literal, .rst-content tt.literal{
+    color: #8d60b0;
+}
+
 .wy-nav-side{
     background: #ececec;
     border-right-color: #dddddd;
