@@ -21,10 +21,10 @@ _____
 This package has some useful python objects you can import into your own nodes to send trajectories to the robot.
 
 - ``JointTrajectoryHandler``: Sends joint trajectories to the robot.
-    - Choose between several [UR ROS controllers](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/doc/controllers.md): ``scaled_pos_joint_traj_controller``, ``scaled_vel_joint_traj_controller``, ``pos_joint_traj_controller``, ``vel_joint_traj_controller``, and ``forward_joint_traj_controller``
+    - Choose between several `UR ROS controllers <https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/doc/controllers.md>`_: ``scaled_pos_joint_traj_controller``, ``scaled_vel_joint_traj_controller``, ``pos_joint_traj_controller``, ``vel_joint_traj_controller``, and ``forward_joint_traj_controller``
     - You can also go to specific joint configurations via the ``go_to_point()`` function.
 - ``CartesianTrajectoryHandler``: Sends end effector pose trajectories to the robot.
-    - Choose between several [UR ROS controllers](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/doc/controllers.md): ``pose_based_cartesian_traj_controller``, ``joint_based_cartesian_traj_controller``, and ``forward_cartesian_traj_controller``
+    - Choose between several `UR ROS controllers <https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/doc/controllers.md>`_: ``pose_based_cartesian_traj_controller``, ``joint_based_cartesian_traj_controller``, and ``forward_cartesian_traj_controller``
     - You can also go to specific cartesian poses via the ``go_to_point()`` function.
 - ``TwistHandler``: Sends cartesian end effector velocities to the robot.
     - This uses the ``twist_controller`` from the `UR ROS controllers <https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/doc/controllers.md>`_.
